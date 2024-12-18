@@ -8,43 +8,71 @@ const passedSafetyRuleOne = (report) => {
     const isAllAscending = report.toString() === ascendingList.toString()
     const isAllDescending = report.toString() === descendingList.toString()
 
-    console.log('report', report)
-    // console.log('ascendingList', ascendingList)
-    // console.log('descendingList', descendingList)
-    // console.log('isAllAscending', isAllAscending)
-    // console.log('isAllDescending', isAllDescending)
-    console.log('passed?', isAllAscending || isAllDescending)
-
     return isAllAscending || isAllDescending ? true : false
 }
 
 const passedSafetyRuleTwo = (report) => {
-    let lastLevel = null
+    let passed = true
 
-    report.forEach(level => {
-        if (!lastLevel) {
-            lastLevel = level
-
-            return
-        }
+    for (let index = 1; index < report.length; index++) {
+        const level = report[index]
+        const lastLevel = report[index - 1]
 
         const levelDiff = Math.abs(level - lastLevel)
         
         if (levelDiff >= 1 && levelDiff <= 3) {
-            lastLevel = level
-
-            return true
+            null
         } else {
-            return false
+            passed = false
         }
-    })
+    }
 
-    return true
+    return passed
+}
+
+const passedDampenerRule = (report) => {
+    let numberOfBadLevels = 0
+    const reportPassedRuleOne = passedSafetyRuleOne(report)
+    const reportPassedRuleTwo = passedSafetyRuleTwo(report)
+
+    if (!reportPassedRuleOne || !reportPassedRuleTwo) {
+        for (let index = 0; index < report.length; index++) {
+            const copiedReport = [...report];
+            copiedReport.splice(index, 1)
+    
+            const passedRuleOne = passedSafetyRuleOne(copiedReport)
+            const passedRuleTwo = passedSafetyRuleTwo(copiedReport)
+
+    
+            if (passedRuleOne && passedRuleTwo) {
+                return true
+            } else {
+                numberOfBadLevels++
+            }
+        }
+    }
+
+    const passed = numberOfBadLevels <= 1
+
+    return passed
 }
 
 
-const numberOfSafeReports = reports.reduce((acc, report) =>
-    passedSafetyRuleOne(report) && passedSafetyRuleTwo(report) ? acc + 1 : acc
+const numberOfSafeReports = reports.reduce((acc, report) => {
+    const passedRuleOne = passedSafetyRuleOne(report)
+    const passedRuleTwo = passedSafetyRuleTwo(report)
+
+    return passedRuleOne && passedRuleTwo ? acc + 1 : acc
+}
 , 0)
 
 console.log('Answer for part one:', numberOfSafeReports)
+
+const numberOfSafeReportsPartTwo = reports.reduce((acc, report) => {
+    const passedDampener = passedDampenerRule(report)
+
+    return  passedDampener ? acc + 1 : acc
+}
+, 0)
+
+console.log('Answer for part two:', numberOfSafeReportsPartTwo)
